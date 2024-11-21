@@ -1,0 +1,32 @@
+package main
+
+ghost
+ensures res.rooted == isRooted(path)
+decreases
+pure func ToPath(path seq[byte]) (res Path) {
+	return toPath( bytes.SpecSplit(pathContents(path), seq[byte]{'/'} ), isRooted(path))
+}
+
+ghost
+ensures res.rooted == rooted
+decreases len(flat)
+pure func toPath(flat seq[seq[byte]], rooted bool) (res Path) {
+	return len(flat) == 0 ?
+		newPath(rooted) :
+		pathAppend( toPath(flat[:len(flat)-1], rooted), flat[len(flat)-1] )
+}
+
+ghost
+decreases
+pure func newPath(rooted bool) (res Path) {
+	return Path{parts: seq[Segment]{}, rooted: rooted}
+}
+
+ghost
+decreases
+pure func pathAppend(p Path, s Segment) (res Path) {
+	return Path{
+		parts: p.parts ++ seq[Segment]{s},
+		rooted: p.rooted,
+	}
+}
