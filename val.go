@@ -7,7 +7,7 @@ type Val interface {
 }
 
 type Seq struct {
-	typ   string
+	typ   Type
 	elems []Val
 }
 
@@ -41,6 +41,15 @@ func (s Int) Equals(other Val) bool {
 	}
 
 	return o.val == s.val
+}
+
+type SymVal struct {
+	e Expr
+}
+
+func (s SymVal) Equals(other Val) bool {
+	x, ok := other.(SymVal)
+	return ok && (x == s)
 }
 
 type Bool struct {
@@ -91,6 +100,14 @@ func asInt(v Val) int {
 	val, ok := v.(Int)
 	if !ok {
 		panic(fmt.Sprintf("expected type of %v to be int but got something else", v))
+	}
+	return val.val
+}
+
+func asBool(v Val) bool {
+	val, ok := v.(Bool)
+	if !ok {
+		panic(fmt.Sprintf("expected type of %v to be bool but got something else", v))
 	}
 	return val.val
 }
