@@ -172,7 +172,7 @@ func (t Call) Step(c *Ctx) (Expr, bool) {
 	fun := c.getFn(t.name)
 	res := fun.body
 
-	assert(len(fun.vars) == len(args))
+	assert(len(fun.vars) == len(args), fmt.Sprintf("wrong number of arguments for %s", t.name))
 	for i, name := range fun.vars {
 		res = res.Subst(name, args[i])
 	}
@@ -369,7 +369,9 @@ func (t SeqSlice) Step(c *Ctx) (Expr, bool) {
 		res[i] = lit(v)
 	}
 
-	c.critical = t
+	if low != 0 {
+		c.critical = t
+	}
 
 	expr := SeqLit{seq.typ, res}
 	expr.typ = expr.Type(c)
@@ -479,6 +481,26 @@ func (b BoolLit) Subst(s string, to Expr) Expr {
 	return b
 }
 
+type SymLit struct {
+	val SymVal
+}
+
+func (b SymLit) String() string {
+	return b.val.e.String()
+}
+
+func (t SymLit) Step(c *Ctx) (Expr, bool) {
+	return t, false
+}
+
+func (b SymLit) ToValue() (Val, bool) {
+	return b.val, true
+}
+
+func (b SymLit) Subst(s string, to Expr) Expr {
+	return b
+}
+
 func lit(v Val) Expr {
 	switch val := v.(type) {
 	case Seq:
@@ -498,7 +520,7 @@ func lit(v Val) Expr {
 		}
 		return StructLit{val.typ, elems}
 	case SymVal:
-		return val.e
+		return SymLit{val}
 	}
 	panic("")
 }

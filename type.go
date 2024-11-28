@@ -103,6 +103,7 @@ func (t IntLit) Type(c *Ctx) Type    { return tint() }
 func (t Ternop) Type(c *Ctx) Type    { return t.yes.Type(c) }
 func (t Var) Type(c *Ctx) Type       { return TAbstract{t.Name} }
 func (t StructLit) Type(c *Ctx) Type { return TAbstract{t.typ} }
+func (t SymLit) Type(c *Ctx) Type    { return t.val.e.Type(c) }
 func (t Call) Type(c *Ctx) Type {
 	fn := c.tryGetFn(t.name)
 	if fn == nil {

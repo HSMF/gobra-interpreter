@@ -8,7 +8,7 @@ import (
 
 type binop int
 
-// this is hacky but i cba to add a parameter to the String function
+// this is hacky
 var indentLevel []int = []int{0}
 
 const (
@@ -199,6 +199,9 @@ func generateFunctionCallAssertions(e Expr) {
 
 	s = rename(s, tseq(tbyte(), IntLit{'/'}), "sep")
 	s = rename(s, seq(tseq(tbyte(), IntLit{'.'}, IntLit{'.'})), "tail")
+	s = rename(s, seqStr("d"), "sep")
+	s = rename(s, seqStr("abcd"), "abcd")
+	s = rename(s, seqStr("abc"), "abc")
 
 	fmt.Println(s)
 }
@@ -242,6 +245,7 @@ func mkCtx() Ctx {
 		pathContents(),
 		isRooted(),
 		pathAppend(),
+		Repeat(),
 	})
 }
 
@@ -303,12 +307,26 @@ func main() {
 	println()
 	println()
 
+	sep = seqStr("/")
+
+	fmt.Println(SpecSplitInner().body)
+
 	// generateLikelyAssertions(call("bytes.SpecSplit", s, sep))
 	// generateLikelyAssertions(call("ToPath", tseq(tbyte())))
 	// generateLikelyAssertions(call("ToPath", tseq(tbyte(), IntLit{'/'}, IntLit{'a'})))
 	// generateLikelyAssertions(call("ToPath", tseq(tbyte(), IntLit{'.'})))
 	// generateFunctionCallAssertions(call("ToPath", tseq(tbyte(), IntLit{'.'})))
 	// generateFunctionCallAssertions(call("ToPath", tseq(tbyte())))
-	generateFunctionCallAssertions(call("bytes.SpecSplitInner", tseq(tbyte(), IntLit{'.'}, IntLit{'.'}), tseq(tbyte(), IntLit{'/'}), tseq(tbyte())))
+	// generateFunctionCallAssertions(call("bytes.SpecSplitInner", tseq(tbyte(), IntLit{'.'}, IntLit{'.'}), tseq(tbyte(), IntLit{'/'}), tseq(tbyte())))
+	// generateFunctionCallAssertions(call("bytes.SpecSplit", seqStr("abcd"), tseq(tbyte(), IntLit{'a'})))
+	generateFunctionCallAssertions(call("bytes.Repeat", seqStr("ab"), IntLit{2}))
+	generateFunctionCallAssertions(call("bytes.Repeat", seqStr("ab"), IntLit{0}))
+	generateFunctionCallAssertions(call("bytes.Repeat", seqStr("a"), IntLit{4}))
+	generateFunctionCallAssertions(call("bytes.SpecSplit", seqStr("abcd"), tseq(tbyte(), IntLit{'d'})))
+	generateFunctionCallAssertions(call("bytes.SpecSplit", seqStr(""), tseq(tbyte(), IntLit{'/'})))
+	generateFunctionCallAssertions(call("bytes.SpecSplitInner", seqStr("c/"), tseq(tbyte(), IntLit{'/'}), tseq(tbyte(), IntLit{'-'})))
+	generateFunctionCallAssertions(call("bytes.SpecSplitInner", seqStr("c/"), tseq(tbyte(), IntLit{'/'}), v("ac")))
+	// generateFunctionCallAssertions(call("bytes.SpecSplitInner", seqStr("/"), tseq(tbyte(), IntLit{'/'}), v("ac")))
+	// generateFunctionCallAssertions(call("bytes.SpecSplitInner", sep, sep, v("ac")))
 	// expr :=
 }

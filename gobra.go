@@ -20,6 +20,42 @@ func SpecSplit() Func {
 }
 
 func SpecSplitInner() Func {
+
+	// return len(s) == 0 ?
+	// 	seq[seq[byte]]{ac} :
+	// 	s[:len(sep)] == sep ?
+	// 		seq[seq[byte]]{ac} ++ SplitInner(s[len(sep):], sep, seq[byte]{}) :
+	// 		SplitInner(s[1:], sep, ac ++ seq[byte]{s[0]})
+
+	return Func{
+		Name:   "bytes.SpecSplitInner",
+		vars:   []string{"s", "sep", "ac"},
+		rettyp: TSeq{TSeq{tbyte()}},
+		body: Ternop{
+			Binop{eqeq, Len(v("s")), IntLit{0}},
+			tseq(TSeq{tbyte()}, v("ac")),
+			Ternop{
+				Binop{eqeq, SeqSlice{v("s"), nil, Len(v("sep"))}, v("sep")},
+				Binop{concat, tseq(TSeq{tbyte()}, v("ac")),
+					call("bytes.SpecSplitInner",
+						SeqSlice{v("s"), Len(v("sep")), nil},
+						v("sep"),
+						tseq(tbyte()),
+					),
+				},
+				call("bytes.SpecSplitInner",
+					SeqSlice{v("s"), IntLit{1}, nil},
+					v("sep"),
+					Binop{concat, v("ac"),
+						tseq(tbyte(), SeqIndex{v("s"), IntLit{0}}),
+					},
+				),
+			},
+		},
+	}
+}
+
+func SpecSplitInner2() Func {
 	return Func{
 		Name: "bytes.SpecSplitInner",
 		vars: []string{"s", "sep", "ac"},
@@ -144,6 +180,19 @@ func pathAppend() Func {
 		body: StructLit{
 			"Path",
 			fields,
+		},
+	}
+}
+
+func Repeat() Func {
+	return Func{
+		Name:   "bytes.Repeat",
+		vars:   []string{"b", "count"},
+		rettyp: TSeq{tbyte()},
+		body: Ternop{
+			Binop{eqeq, v("count"), IntLit{0}},
+			tseq(tbyte()),
+			Binop{concat, v("b"), call("bytes.Repeat", v("b"), Binop{sub, v("count"), IntLit{1}})},
 		},
 	}
 }
